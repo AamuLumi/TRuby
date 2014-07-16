@@ -1,21 +1,15 @@
 
 module TRuby
 
-	LEFT = 0x00
-	RIGHT = 0x01
-	UP = 0x11
-	DOWN = 0x10
-
 	class Player
 
 		attr_reader :x, :y, :bombsRemaining, :bombDuration, :power
 
-		def initialize(window, x, y)
+		def initialize(x, y, mx, my)
 			@x = x
 			@y = y
-			@mx = window.map.width
-			@my = window.map.height
-			@tile_size = window.map.tile_size
+			@mx = mx
+			@my = my
 			@bombsRemaining = 1
 			@maxBomb = 1
 			@bombDuration = 3000
@@ -25,13 +19,26 @@ module TRuby
 		def move(direction)
 			case direction
 			when LEFT
-				@x = (@x -1) if @x > 0
+				@x -= 1 if @x > 0
 			when RIGHT 
-				@x = (@x +1) if @x < @mx
+				@x += 1 if @x < @mx
 			when UP
-				@y = (@y -1) if @y > 0
+				@y -= 1 if @y > 0
 			when DOWN
-				@y = (@y +1) if @y < @my
+				@y += 1 if @y < @my
+			end
+		end
+
+		def canMove(direction)
+			case direction
+			when LEFT
+				@x > 0
+			when RIGHT 
+				@x < @mx
+			when UP
+				@y > 0
+			when DOWN
+				@y < @my
 			end
 		end
 		

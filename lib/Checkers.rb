@@ -4,16 +4,20 @@ module TRuby::Checkers
 	### STATE_PLAYING
 
 	def checkPlayers
-		if (@powerups["#{@player.x}_#{@player.y}"] != nil)
-			if (@powerups["#{@player.x}_#{@player.y}"].class == TRuby::Fireup)
-				@player.changePower(@powerups["#{@player.x}_#{@player.y}"].power)
-				@powerups.delete("#{@player.x}_#{@player.y}")
-			elsif (@powerups["#{@player.x}_#{@player.y}"].class == TRuby::Bombup)
-				@player.changeBomb(@powerups["#{@player.x}_#{@player.y}"].bomb)
-				@powerups.delete("#{@player.x}_#{@player.y}")
-			elsif (@powerups["#{@player.x}_#{@player.y}"].class == TRuby::Timeup)
-				@player.changeDuration(@powerups["#{@player.x}_#{@player.y}"].duration)
-				@powerups.delete("#{@player.x}_#{@player.y}")
+		@players.each do |p|
+			if (p != nil)
+				if (@powerups["#{p.x}_#{p.y}"] != nil)
+					if (@powerups["#{p.x}_#{p.y}"].class == TRuby::Fireup)
+						p.changePower(@powerups["#{p.x}_#{p.y}"].power)
+						@powerups.delete("#{p.x}_#{p.y}")
+					elsif (@powerups["#{p.x}_#{p.y}"].class == TRuby::Bombup)
+						p.changeBomb(@powerups["#{p.x}_#{p.y}"].bomb)
+						@powerups.delete("#{p.x}_#{p.y}")
+					elsif (@powerups["#{p.x}_#{p.y}"].class == TRuby::Timeup)
+						p.changeDuration(@powerups["#{p.x}_#{p.y}"].duration)
+						@powerups.delete("#{p.x}_#{p.y}")
+					end
+				end
 			end
 		end
 	end
@@ -25,4 +29,13 @@ module TRuby::Checkers
 			end
 		end
 	end
+
+	def checkExplosions
+		@explosions.each do |e|
+			if e.isFinished?
+				@explosions.delete(e)
+			end
+		end
+	end
+
 end

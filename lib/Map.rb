@@ -3,7 +3,7 @@ module MapReader
 
 	class Map
 
-		attr_reader :width, :height, :tile_size, :nb_players
+		attr_reader :width, :height, :tile_size, :nb_players, :isLoaded
 
 		def initialize()
 
@@ -16,6 +16,7 @@ module MapReader
 			i = 0
 			readData = false
 			readSpawns = false
+			isLoaded = false
 
 			tmp_nb_spawns = 0
 
@@ -38,7 +39,7 @@ module MapReader
 				if (readData)
 					j=0
 					line.each_byte do |c|
-						@datas[i*@height +j] = c.to_i - 48
+						@datas[(i*@height)+j] = c.to_i - 48
 						j+=1
 					end
 
@@ -68,16 +69,17 @@ module MapReader
 
 			end
 
+			isLoaded = true
 			f.close
 
 		end
 
 		def datasValueFor(x, y)
-			return @datas[x*@height +y]
+			return @datas[(x*@height) +y]
 		end
 
 		def changeData(x, y, value)
-			@datas[x*@height +y] = value
+			@datas[(x*@height) +y] = value
 		end
 
 		def getSpawn(n)
