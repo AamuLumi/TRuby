@@ -3,16 +3,17 @@ module MapReader
 
 	class Map
 
-		attr_reader :width, :height, :tile_size, :nb_players, :isLoaded
+		attr_reader :width, :height, :tile_size, :nbPlayers, :isLoaded, :name, :path
 
-		def initialize()
-
+		def initialize(name, path)
+			@name = name
+			@path = path
 		end
 
-		def readFile(filePath)
-			raise "File not Found" unless (File.exists?(filePath))
+		def readFile
+			raise "File not Found" unless (File.exists?(@path))
 
-			f = File.open(filePath, "r")
+			f = File.open(@path, "r")
 			i = 0
 			readData = false
 			readSpawns = false
@@ -22,7 +23,7 @@ module MapReader
 
 			@width = 0
 			@height = 0
-			@nb_players = 0
+			@nbPlayers = 0
 			@spawns = Hash.new
 			@datas = Hash.new
 
@@ -51,8 +52,8 @@ module MapReader
 					if line.include?(":")
 						tmp = line.split(":") 
 						case tmp[0]
-						when "nb_players"
-							@nb_players = tmp[1].to_i
+						when "players"
+							@nbPlayers = tmp[1].to_i
 						when "width"
 							@width = tmp[1].to_i
 						when "height"

@@ -25,20 +25,79 @@ module TRuby::Printers
 	end
 
 	def printItemsMenu
-		@image_create_server.draw(270,150,0)
-		@image_join_server.draw(270,225,0)
-		@image_quit.draw(270,300,0)
-	end
-
-	def printSelection
-		if (@selection == SELECTION_CREATE_SERVER)
-			@image_selection.draw(265,149,0)
-		elsif (@selection == SELECTION_JOIN_SERVER)
-			@image_selection.draw(265,224,0)
-		elsif (@selection == SELECTION_QUIT)
-			@image_selection.draw(265,299,0)
+		if (@menuItems != nil)
+			(0...@menuItems.size).each do |i|
+				if @selection == i
+					@font_window_big.draw(@menuItems[i], 40, 150 + i*75, 0, 1, 1, 0xff000000)
+				else
+					@font_window.draw(@menuItems[i], 40, 150 + i*75, 0, 1, 1, 0xff000000)
+				end
+			end
 		end
 	end
+
+	### STATE_MAP_SELECTION
+
+	def printMapSelectionTitle
+		@font_window_title.draw("Maps available", 50, 40, 0, 1, 1)
+	end
+
+	def printMapsList
+		if (@maps != nil)
+			(0...@maps.size() +1).each do |i|
+				if @selection == i
+					if i == @maps.size()
+						@font_window_big.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					else
+						@font_window_big.draw(@maps[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					end
+				else
+					if i == @maps.size()
+						@font_window.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					else
+						@font_window.draw(@maps[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					end
+				end
+			end
+		end
+	end
+
+	def printBackgroundMapSelection
+		@image_background_map_selection.draw(0,0,0)
+	end
+
+	### STATE_PARAMS_SELECTION
+
+	def printParamsSelectionTitle
+		@font_window_title.draw("Parameters", 50, 40, 0, 1, 1)
+	end
+
+	def printParamsItems
+		if (@paramsItems != nil)
+			(0...@paramsItems.size() +1).each do |i|
+				if @selection == i
+					if i == @paramsItems.size()
+						@font_window_big.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					else
+						if (@paramsItems[i].value != nil)
+							@font_window_big.draw(@paramsItems[i].value, 360, 120 + i*30, 0, 1, 1, 0xff000000)
+						end
+						@font_window_big.draw(@paramsItems[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					end
+				else
+					if i == @paramsItems.size()
+						@font_window.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					else
+						if (@paramsItems[i].value != nil)
+							@font_window.draw(@paramsItems[i].value, 360, 120 + i*30, 0, 1, 1, 0xff000000)
+						end
+						@font_window.draw(@paramsItems[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+					end
+				end
+			end
+		end
+	end
+
 
 	### STATE_PLAYING
 

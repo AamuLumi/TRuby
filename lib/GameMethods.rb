@@ -2,6 +2,27 @@
 
 module TRuby::GameMethods
 
+	def listMaps
+		@maps = Array.new
+		Dir["./maps/*.map"].each do |m|
+			@maps.push(MapReader::Map.new(getMapNameFromPath(m), m))
+		end
+	end
+
+	def validateParams
+		if (@isServer)
+			@nbPlayers = @paramsItems[SELECTION_NB_PLAYERS].value
+			@port = @paramsItems[SELECTION_PORT].value
+		else
+			@ip = @paramsItems[CLIENT_SELECTION_IP].value
+			@port = @paramsItems[CLIENT_SELECTION_PORT].value
+		end
+	end
+
+	def getMapNameFromPath(p)
+		p.split("/").pop.split(".")[0].capitalize
+	end
+
 	def bombOn(x, y)
 		@bombs["#{x}_#{y}"] != nil
 	end
@@ -77,13 +98,13 @@ module TRuby::GameMethods
 				if wallDestructByPreviousBomb?(bomb.x-i, bomb.y, wallExploded)
 					puts "#{bomb.x-i}_#{bomb.y}"
 					wallFound = true
-				elsif powerUpOn(bomb.x-i, bomb.y) and (bomb.x() -i) >= 0
-					removePowerUpOn(bomb.x-i, bomb.y)
 				elsif (@map.datasValueFor(bomb.x-i, bomb.y) == 1 and (bomb.x() -i) >= 0)
 					@map.changeData(bomb.x-i, bomb.y, 0)
 					popPowerUp(bomb.x-i, bomb.y)
 					wallFound = true
 					wallExploded.push("#{bomb.x-i}_#{bomb.y}")
+				elsif powerUpOn(bomb.x-i, bomb.y) and (bomb.x() -i) >= 0
+					removePowerUpOn(bomb.x-i, bomb.y)
 				end
 				if (bombOn(bomb.x-i, bomb.y)) and (bomb.x() -i) >= 0
 					bombExplosion(@bombs["#{bomb.x-i}_#{bomb.y}"], wallExploded) if (!@bombs["#{bomb.x-i}_#{bomb.y}"].exploded)
@@ -100,13 +121,13 @@ module TRuby::GameMethods
 				if wallDestructByPreviousBomb?(bomb.x+i, bomb.y, wallExploded)
 					puts "#{bomb.x-i}_#{bomb.y}"
 					wallFound = true
-				elsif powerUpOn(bomb.x+i, bomb.y) and (bomb.x()+i) < @map.width
-					removePowerUpOn(bomb.x+i, bomb.y)
 				elsif (@map.datasValueFor(bomb.x+i, bomb.y) == 1 and (bomb.x()+i) < @map.width) 
 					@map.changeData(bomb.x+i, bomb.y, 0)
 					popPowerUp(bomb.x+i, bomb.y)
 					wallFound = true
 					wallExploded.push("#{bomb.x+i}_#{bomb.y}")
+				elsif powerUpOn(bomb.x+i, bomb.y) and (bomb.x()+i) < @map.width
+					removePowerUpOn(bomb.x+i, bomb.y)
 				end
 				if bombOn(bomb.x+i, bomb.y) and (bomb.x()+i) < @map.width
 					bombExplosion(@bombs["#{bomb.x+i}_#{bomb.y}"], wallExploded) if (!@bombs["#{bomb.x+i}_#{bomb.y}"].exploded)
@@ -122,13 +143,13 @@ module TRuby::GameMethods
 				positions.push("#{bomb.x}_#{bomb.y-i}")
 				if wallDestructByPreviousBomb?(bomb.x, bomb.y-i, wallExploded)
 					wallFound = true
-				elsif powerUpOn(bomb.x, bomb.y-i) and (bomb.y() -i) >= 0
-					removePowerUpOn(bomb.x, bomb.y-i)
 				elsif (@map.datasValueFor(bomb.x, bomb.y-i) == 1 and (bomb.y() -i) >= 0)
 					@map.changeData(bomb.x, bomb.y-i, 0)
 					popPowerUp(bomb.x, bomb.y-i)
 					wallFound = true
 					wallExploded.push("#{bomb.x}_#{bomb.y-i}")
+				elsif powerUpOn(bomb.x, bomb.y-i) and (bomb.y() -i) >= 0
+					removePowerUpOn(bomb.x, bomb.y-i)
 				end
 				if (bombOn(bomb.x, bomb.y-i)) and (bomb.y() -i) >= 0
 					bombExplosion(@bombs["#{bomb.x}_#{bomb.y-i}"], wallExploded) if (!@bombs["#{bomb.x}_#{bomb.y-i}"].exploded)
@@ -144,13 +165,13 @@ module TRuby::GameMethods
 				positions.push("#{bomb.x}_#{bomb.y+i}")
 				if wallDestructByPreviousBomb?(bomb.x, bomb.y+i, wallExploded)
 					wallFound = true
-				elsif powerUpOn(bomb.x, bomb.y+i) and (bomb.y() + i) < @map.height
-					removePowerUpOn(bomb.x, bomb.y+i)
 				elsif (@map.datasValueFor(bomb.x, bomb.y+i) == 1 and (bomb.y() + i) < @map.height)
 					@map.changeData(bomb.x, bomb.y+i, 0)
 					popPowerUp(bomb.x, bomb.y+i)
 					wallFound = true
 					wallExploded.push("#{bomb.x}_#{bomb.y+i}")
+				elsif powerUpOn(bomb.x, bomb.y+i) and (bomb.y() + i) < @map.height
+					removePowerUpOn(bomb.x, bomb.y+i)
 				end
 				if (bombOn(bomb.x, bomb.y+i)) and (bomb.y() + i) < @map.height
 					bombExplosion(@bombs["#{bomb.x}_#{bomb.y+i}"], wallExploded) if (!@bombs["#{bomb.x}_#{bomb.y+i}"].exploded)
@@ -177,7 +198,7 @@ module TRuby::GameMethods
 
 	def waitInitialisationPlaying
 		while (@initializePlaying)
-			puts "[CLIENT]Waiting Initialisation"
+			#puts "[CLIENT]Waiting Initialisation"
 		end
 	end
 

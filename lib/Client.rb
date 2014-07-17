@@ -8,18 +8,24 @@ module TRuby::Client
 		@connection_closed = false
 		Thread.new do 
 			while (!@connection_closed)
-				puts "[CLIENT] Waiting message"
+				debug "[CLIENT] Waiting message"
 				str = @client.gets.chomp
 				clientAnalyzeMessage(str)
 			end
-			puts "[CLIENT] Receving end"
+			debug "[CLIENT] Receving end"
 		end 
 	end
 
 	def clientAnalyzeMessage(message)
-		puts "[CLIENT] Analyze of #{message}"
+		debug "[CLIENT] Analyze of #{message}"
 		aMessage = message.split("~$")
 		case aMessage[0]
+		when "datas"
+			begin
+				@openedFile.puts aMessage[1]
+			rescue
+				debug "[ERROR] Writing map file"
+			end
 		when "ins"
 			analyzeInstruction(aMessage[1])
 		when "init"
@@ -30,26 +36,32 @@ module TRuby::Client
 	end
 
 	def analyzeInit(init)
-		puts "[CLIENT] Determined as Initialization : #{init}"
+		debug "[CLIENT] Determined as Initialization : #{init}"
 		aInit = init.split("!")
 		case aInit[0]
 		when "numPlayer" # Pour définir le numéro du client
 			@num_actual_player = aInit[1].to_i
 		when "startGame" # Pour démarrer le jeu
 			needChangeToState(STATE_PLAYING)
+		when "mapDatas"
+			@mapName = aInit[1]
+			@openedFile = File.open("./maps/#{aInit[1]}.map", 'w')
+		when "endMapDatas"
+			@openedFile.close
+			@map = MapReader::Map.new(@mapName, "./maps/#{@mapName}.map")
 		end
 	end
 
 	def analyzeInstruction(ins)
 		waitInitialisationPlaying
-		puts "[CLIENT] Determined as Instruction : #{ins}"
+		debug "[CLIENT] Determined as Instruction : #{ins}"
 		aIns = ins.split("!")
 		case aIns[0]
 		when "newPlayer" # Pour ajouter un joueur newPlayer!numPlayer!x!y
-			puts "[CLIENT] Add new player instruction"
+			debug "[CLIENT] Add new player instruction"
 			@mutexPlayerDatas.synchronize do
 				newPlayer(aIns[1].to_i, aIns[2].to_i, aIns[3].to_i)
-				puts "[CLIENT] New player added"
+				debug "[CLIENT] New player added"
 			end
 		when "move" # move!numPlayer!numDirection
 			movePlayer(aIns[1].to_i, aIns[2].to_i)
@@ -72,13 +84,13 @@ module TRuby::Client
 	end
 
 	def leaveServer
-		puts "[CLIENT] Leaving Server"
+		debug "[CLIENT] Leaving Server"
 		@connection_closed = true
 		@client.close if @client != nil
 	end
 
 	def sendMessage(message)
-		puts "[CLIENT] Sending message #{message}"
+		debug "[CLIENT] Sending message #{message}"
 		@client.puts message
 	end
 

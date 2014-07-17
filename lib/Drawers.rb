@@ -4,7 +4,6 @@ module TRuby::Drawers
 
 	def drawMenu
 		printBackgroundMenu
-		printSelection
 		printItemsMenu
 		
 	end
@@ -17,6 +16,20 @@ module TRuby::Drawers
 		printPowerUps
 
 		printExplosions
+	end
+
+	def drawMapSelection
+		printBackgroundMapSelection
+
+		printMapSelectionTitle
+		printMapsList
+	end
+
+	def drawParamsSelection
+		printBackgroundMapSelection
+
+		printParamsSelectionTitle
+		printParamsItems
 	end
 
 	def drawWaitingServer
