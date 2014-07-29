@@ -36,8 +36,8 @@ Known Issues
 =====
 
   - [ ] Can only join a localhost server
-  - [ ] Launching the game with one player : the player wins 
-    > Solution : set variable @debugMode (l.48 in main.rb) to true
+  - [ ] Launching the game with one player : the player wins  
+    > Solution : set variable @debugMode (l.48 in main.rb) to true  
     > Debug mode block the game to the STATE_PLAYING = no win in this mode
 
 Screenshots
