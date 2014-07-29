@@ -32,9 +32,30 @@ module TRuby::Checkers
 
 	def checkExplosions
 		@explosions.each do |e|
+			if (@isServer)
+				(0...@nbPlayers).each do |i|
+					puts e.inRange(@players[i].x, @players[i].y)
+					if (e.inRange(@players[i].x, @players[i].y) and e.getAlpha > 0x0f and !@players[i].dead)
+						@players[i].die
+						sendDeathPlayer(i)
+						@nbPlayersAlive -= 1
+					end
+				end
+			end
+
 			if e.isFinished?
 				@explosions.delete(e)
 			end
+		end
+	end
+
+	def checkVictory
+		if (@nbPlayersAlive == 1 && !@debugMode)
+			@roundWon = (@player == getPlayerAlive)
+			puts "#{getPlayerAlive.name} #{getPlayerAlive.points}"
+			getPlayerAlive.addPoint
+
+			changeState(STATE_ENDROUND)
 		end
 	end
 

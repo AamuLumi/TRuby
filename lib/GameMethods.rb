@@ -2,6 +2,26 @@
 
 module TRuby::GameMethods
 
+	def existPlayerWithName?(name)
+		return false if @players.empty?
+
+		@players.each do |p|
+			if p != nil
+				return true if p.name == name
+			end
+		end
+
+		false
+	end
+
+	def idForPlayerName(name)
+		(0...@nbPlayers).each do |n|
+			return n if @players[n].name == name
+		end
+
+		nil
+	end
+
 	def listMaps
 		@maps = Array.new
 		Dir["./maps/*.map"].each do |m|
@@ -96,7 +116,6 @@ module TRuby::GameMethods
 			if (!wallFound)
 				positions.push("#{bomb.x-i}_#{bomb.y}")
 				if wallDestructByPreviousBomb?(bomb.x-i, bomb.y, wallExploded)
-					puts "#{bomb.x-i}_#{bomb.y}"
 					wallFound = true
 				elsif (@map.datasValueFor(bomb.x-i, bomb.y) == 1 and (bomb.x() -i) >= 0)
 					@map.changeData(bomb.x-i, bomb.y, 0)
@@ -202,9 +221,17 @@ module TRuby::GameMethods
 		end
 	end
 
-	def newPlayer(numPlayer, x, y)
-		@players[numPlayer] = TRuby::Player.new(x, y, @map.width, @map.height)
+	def newPlayer(name, numPlayer, x, y)
+		@players[numPlayer] = TRuby::Player.new(name, x, y, @map.width, @map.height)
 	end
 
+	def getPlayerAlive
+		@players.each do |p|
+			puts "#{p.dead} #{p.name}"
+			return p if !p.dead 
+		end
+
+		nil
+	end
 
 end

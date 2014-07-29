@@ -6,11 +6,13 @@ module TRuby::Printers
 	end
 
 	def toXWindowDimension(size)
+		return (size * WIDTH) / 640 if @actualState != STATE_PLAYING
 		(size * WIDTH) / (@map.width * @map.tile_size)
 	end 
 
 	def toYWindowDimension(size)
-		(size * HEIGHT) / (@map.height * @map.tile_size)
+		return (size * (HEIGHT - HEIGHT_HUD) )/ 640 if @actualState != STATE_PLAYING
+		(size * (HEIGHT - HEIGHT_HUD)) / (@map.height * @map.tile_size)
 	end
 
 	def printWindowMessage(message)
@@ -21,16 +23,16 @@ module TRuby::Printers
 	### STATE_MENU
 
 	def printBackgroundMenu
-		@image_background.draw(0,0,0)
+		@image_background.draw(0,0,0, @dx, @dy)
 	end
 
 	def printItemsMenu
 		if (@menuItems != nil)
 			(0...@menuItems.size).each do |i|
 				if @selection == i
-					@font_window_big.draw(@menuItems[i], 40, 150 + i*75, 0, 1, 1, 0xff000000)
+					@font_window_big.draw(@menuItems[i], toXWindowDimension(40), toYWindowDimension(150 + i*75), 0, @dx, @dy, 0xff000000)
 				else
-					@font_window.draw(@menuItems[i], 40, 150 + i*75, 0, 1, 1, 0xff000000)
+					@font_window.draw(@menuItems[i], toXWindowDimension(40), toYWindowDimension(150 + i*75), 0, @dx, @dy, 0xff000000)
 				end
 			end
 		end
@@ -39,7 +41,7 @@ module TRuby::Printers
 	### STATE_MAP_SELECTION
 
 	def printMapSelectionTitle
-		@font_window_title.draw("Maps available", 50, 40, 0, 1, 1)
+		@font_window_title.draw("Maps available", toXWindowDimension(50), toYWindowDimension(40), 0, @dx, @dy)
 	end
 
 	def printMapsList
@@ -47,15 +49,15 @@ module TRuby::Printers
 			(0...@maps.size() +1).each do |i|
 				if @selection == i
 					if i == @maps.size()
-						@font_window_big.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window_big.draw("Return", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					else
-						@font_window_big.draw(@maps[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window_big.draw(@maps[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					end
 				else
 					if i == @maps.size()
-						@font_window.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window.draw("Return", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					else
-						@font_window.draw(@maps[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window.draw(@maps[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					end
 				end
 			end
@@ -63,13 +65,13 @@ module TRuby::Printers
 	end
 
 	def printBackgroundMapSelection
-		@image_background_map_selection.draw(0,0,0)
+		@image_background_map_selection.draw(0,0,0, @dx, @dy)
 	end
 
 	### STATE_PARAMS_SELECTION
 
 	def printParamsSelectionTitle
-		@font_window_title.draw("Parameters", 50, 40, 0, 1, 1)
+		@font_window_title.draw("Parameters", toXWindowDimension(50), toYWindowDimension(40), 0, @dx, @dy)
 	end
 
 	def printParamsItems
@@ -77,21 +79,21 @@ module TRuby::Printers
 			(0...@paramsItems.size() +1).each do |i|
 				if @selection == i
 					if i == @paramsItems.size()
-						@font_window_big.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window_big.draw("Return", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					else
 						if (@paramsItems[i].value != nil)
-							@font_window_big.draw(@paramsItems[i].value, 360, 120 + i*30, 0, 1, 1, 0xff000000)
+							@font_window_big.draw(@paramsItems[i].value, toXWindowDimension(360), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 						end
-						@font_window_big.draw(@paramsItems[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window_big.draw(@paramsItems[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					end
 				else
 					if i == @paramsItems.size()
-						@font_window.draw("Return", 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window.draw("Return", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					else
 						if (@paramsItems[i].value != nil)
-							@font_window.draw(@paramsItems[i].value, 360, 120 + i*30, 0, 1, 1, 0xff000000)
+							@font_window.draw(@paramsItems[i].value, toXWindowDimension(360), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 						end
-						@font_window.draw(@paramsItems[i].name, 40, 120 + i*30, 0, 1, 1, 0xff000000)
+						@font_window.draw(@paramsItems[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
 					end
 				end
 			end
@@ -116,7 +118,9 @@ module TRuby::Printers
 
 	def printPlayers
 		@players.each do |p|
-			@image_player.draw(toXWindowDimension(p.x * @map.tile_size), toYWindowDimension(p.y * @map.tile_size), 0, @dx, @dy) if p != nil
+			if p != nil
+				@image_player.draw(toXWindowDimension(p.x * @map.tile_size), toYWindowDimension(p.y * @map.tile_size), 0, @dx, @dy) if !p.dead
+			end
 		end
 	end
 
@@ -155,4 +159,52 @@ module TRuby::Printers
 		end
 	end
 
+	def printHUD
+		@image_hud.draw(0, (HEIGHT - HEIGHT_HUD), 0, 1,1)
+
+		@image_fireup.draw(HUD_FIREUP_IMAGE, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1)
+		@font_window.draw("x#{@player.power}", HUD_FIREUP_TEXT, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1, 0xff000000)
+
+		@image_bombup.draw(HUD_BOMBUP_IMAGE, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1)
+		@font_window.draw("x#{@player.bombsRemaining}/#{@player.maxBombs}", HUD_BOMBUP_TEXT, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1, 0xff000000)
+
+		@image_timeup.draw(HUD_TIMEUP_IMAGE, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1)
+		@font_window.draw("x#{@player.bombDuration/1000}.#{@player.bombDuration%1000}s", HUD_TIMEUP_TEXT, HEIGHT - HEIGHT_HUD + HUD_MARGIN, 0, 1, 1, 0xff000000)
+	end
+
+	### STATE_ENDROUND
+
+	def printEndRoundTitle
+		if @roundWon
+			@font_window_title.draw("Victory !", toXWindowDimension(50), toYWindowDimension(40), 0, @dx, @dy) 
+		else
+			@font_window_title.draw("Defeat", toXWindowDimension(50), toYWindowDimension(40), 0, @dx, @dy) 
+		end
+	end
+
+	def printEndRoundItems
+		if (@endRoundItems != nil)
+			(0...@endRoundItems.size() +1).each do |i|
+				if @selection == i
+					if i == @endRoundItems.size()
+						@font_window_big.draw("Fin de la partie", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+					else
+						if (@endRoundItems[i].value != nil)
+							@font_window_big.draw(@endRoundItems[i].value, toXWindowDimension(360), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+						end
+						@font_window_big.draw(@endRoundItems[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+					end
+				else
+					if i == @endRoundItems.size()
+						@font_window.draw("Fin de la partie", toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+					else
+						if (@endRoundItems[i].value != nil)
+							@font_window.draw(@endRoundItems[i].value, toXWindowDimension(360), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+						end
+						@font_window.draw(@endRoundItems[i].name, toXWindowDimension(40), toYWindowDimension(120 + i*30), 0, @dx, @dy, 0xff000000)
+					end
+				end
+			end
+		end
+	end
 end

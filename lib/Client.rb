@@ -3,16 +3,24 @@ require 'socket'
 module TRuby::Client
 
 	def joinServer
-		@client = TCPSocket.new('localhost', 32456)
+		@client = TCPSocket.new('localhost', @port)
 		@client_messages = Array.new
 		@connection_closed = false
+
+		debug "[CLIENT] Beginning connection"
 		Thread.new do 
+			sendReady
 			while (!@connection_closed)
-				debug "[CLIENT] Waiting message"
-				str = @client.gets.chomp
-				clientAnalyzeMessage(str)
+				begin
+					debug "[CLIENT] Waiting message"
+					str = @client.gets.chomp
+					clientAnalyzeMessage(str)
+				rescue
+					debug "[CLIENT] Error with server"
+					@connection_closed = true
+				end
 			end
-			debug "[CLIENT] Receving end"
+			debug "[CLIENT] Receiving finished"
 		end 
 	end
 
@@ -33,6 +41,10 @@ module TRuby::Client
 		else
 			@client_messages.push(aMessage[1])
 		end
+
+		if aMessage.size > 2 # Cas ou 2 trames se suivent
+			clientAnalyzeMessage(aMessage[2...aMessage.size].join("~$"))
+		end
 	end
 
 	def analyzeInit(init)
@@ -41,8 +53,12 @@ module TRuby::Client
 		case aInit[0]
 		when "numPlayer" # Pour définir le numéro du client
 			@num_actual_player = aInit[1].to_i
-		when "startGame" # Pour démarrer le jeu
+		when "nbPlayers"
+			@nbPlayers = aInit[1].to_i
+		when "changeToGame" # Pour démarrer le jeu
 			needChangeToState(STATE_PLAYING)
+		when "startGame"
+			@roundLaunched = true
 		when "mapDatas"
 			@mapName = aInit[1]
 			@openedFile = File.open("./maps/#{aInit[1]}.map", 'w')
@@ -57,11 +73,19 @@ module TRuby::Client
 		debug "[CLIENT] Determined as Instruction : #{ins}"
 		aIns = ins.split("!")
 		case aIns[0]
-		when "newPlayer" # Pour ajouter un joueur newPlayer!numPlayer!x!y
+		when "newPlayer" # Pour ajouter un joueur newPlayer!name!numPlayer!x!y
 			debug "[CLIENT] Add new player instruction"
 			@mutexPlayerDatas.synchronize do
-				newPlayer(aIns[1].to_i, aIns[2].to_i, aIns[3].to_i)
-				debug "[CLIENT] New player added"
+				if existPlayerWithName?(aIns[1])
+					debug "[CLIENT] Player found !"
+					puts "#{idForPlayerName(aIns[1])} #{aIns[2].to_i}"
+					@players[idForPlayerName(aIns[1])], @players[aIns[2].to_i] = @players[aIns[2].to_i], @players[idForPlayerName(aIns[1])]
+					@players[aIns[2].to_i].setCoordonates(aIns[3].to_i, aIns[4].to_i)
+					@players[aIns[2].to_i].live
+				else
+					debug "[CLIENT] New player added"
+					newPlayer(aIns[1], aIns[2].to_i, aIns[3].to_i, aIns[4].to_i)
+				end
 			end
 		when "move" # move!numPlayer!numDirection
 			movePlayer(aIns[1].to_i, aIns[2].to_i)
@@ -76,6 +100,10 @@ module TRuby::Client
 			when TIMEUP
 				addTimeup(aIns[2].to_i, aIns[3].to_i, aIns[4].to_i)
 			end
+		when "death"
+			@players[aIns[1].to_i].die
+			@nbPlayersAlive -= 1
+			puts @nbPlayersAlive
 		end
 	end
 
@@ -85,8 +113,8 @@ module TRuby::Client
 
 	def leaveServer
 		debug "[CLIENT] Leaving Server"
+		@client.close if @client != nil and !@connection_closed
 		@connection_closed = true
-		@client.close if @client != nil
 	end
 
 	def sendMessage(message)
@@ -95,20 +123,24 @@ module TRuby::Client
 	end
 
 	# Send message methods
-	def sendPlayerInit(numPlayer, x, y)
-		sendMessage("ins~$newPlayer!#{numPlayer}!#{x}!#{y}")
+	def sendPlayerInit(name, numPlayer, x, y)
+		sendMessage("ins~$newPlayer!#{name}!#{numPlayer}!#{x}!#{y}~$")
 	end
 
 	def sendMove(move)
-		sendMessage("ins~$move!#{@num_actual_player}!#{move}")
+		sendMessage("ins~$move!#{@num_actual_player}!#{move}~$")
 	end
 
 	def sendBomb(x, y)
-		sendMessage("ins~$bomb!#{@num_actual_player}!#{x}!#{y}")
+		sendMessage("ins~$bomb!#{@num_actual_player}!#{x}!#{y}~$")
 	end
 
 	def sendPowerUp(type, x, y, power)
-		sendMessage("ins~$pwup!#{type}!#{x}!#{y}!#{power}")
+		sendMessage("ins~$pwup!#{type}!#{x}!#{y}!#{power}~$")
+	end
+
+	def sendReady
+		sendMessage("init~$ready!#{@num_actual_player}~$")
 	end
 end
 

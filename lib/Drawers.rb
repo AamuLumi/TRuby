@@ -16,6 +16,8 @@ module TRuby::Drawers
 		printPowerUps
 
 		printExplosions
+
+		printHUD
 	end
 
 	def drawMapSelection
@@ -38,6 +40,13 @@ module TRuby::Drawers
 
 	def drawWaitingClient
 		printWindowMessage("Waiting clients ...")
+	end
+
+	def drawEndRound
+		printBackgroundMapSelection
+
+		printEndRoundTitle
+		printEndRoundItems
 	end
 
 end

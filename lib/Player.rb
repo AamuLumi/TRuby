@@ -3,17 +3,20 @@ module TRuby
 
 	class Player
 
-		attr_reader :x, :y, :bombsRemaining, :bombDuration, :power
+		attr_reader :name, :x, :y, :bombsRemaining, :maxBombs, :bombDuration, :power, :dead, :points
 
-		def initialize(x, y, mx, my)
+		def initialize(name, x, y, mx, my)
+			@name = name
 			@x = x
 			@y = y
 			@mx = mx
 			@my = my
 			@bombsRemaining = 1
-			@maxBomb = 1
+			@maxBombs = 1
 			@bombDuration = 3000
 			@power = 1
+			@dead = false
+			@points = 0
 		end
 
 		def move(direction)
@@ -41,6 +44,11 @@ module TRuby
 				@y < @my
 			end
 		end
+
+		def setCoordonates(x, y)
+			@x = x
+			@y = y
+		end
 		
 		def hasBomb
 			@bombsRemaining > 0
@@ -55,7 +63,7 @@ module TRuby
 		end
 
 		def addBomb
-			if @bombsRemaining < @maxBomb
+			if @bombsRemaining < @maxBombs
 				@bombsRemaining += 1
 			else
 				false
@@ -69,11 +77,11 @@ module TRuby
 		end
 
 		def changeBomb(n)
-			oldMaxBomb = @maxBomb
+			oldMaxBomb = @maxBombs
 
-			@maxBomb += n
-			@maxBomb = 10 if @maxBomb > 10
-			@maxBomb = 1 if @maxBomb < 1
+			@maxBombs += n
+			@maxBombs = 10 if @maxBombs > 10
+			@maxBombs = 1 if @maxBombs < 1
 
 			@bombsRemaining += n
 			@bombsRemaining = 10 if @bombsRemaining > 10
@@ -84,6 +92,22 @@ module TRuby
 			@bombDuration += n
 			@bombDuration = 6000 if @bombDuration > 6000
 			@bombDuration = 1000 if @bombDuration < 1000
+		end
+
+		def die
+			@dead = true
+		end
+
+		def live
+			@dead = false
+		end
+
+		def addPoint
+			@points += 1
+		end
+
+		def removePoint
+			@points -= 1
 		end
 	end	
 end

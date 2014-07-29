@@ -9,19 +9,30 @@ module TRuby::StateManager
 
 	def changeState(state)
 		@mut.synchronize do
+			debug "Switching to state #{state}"
 			if (state == STATE_PLAYING)
 				@actualState = STATE_PLAYING
 				initializePlaying
-			elsif (state == STATE_WAITING_CLIENT)
+			elsif (state == STATE_WAITING_CLIENT and @actualState == STATE_PARAMS_SELECTION)
 				@actualState = STATE_WAITING_CLIENT
 				validateParams
 				initializeWaiting
 				launchServer
-			elsif (state == STATE_WAITING_SERVER)
+			elsif (state == STATE_WAITING_CLIENT)
+				@actualState = STATE_WAITING_CLIENT
+				initializeWaiting
+			elsif (state == STATE_WAITING_SERVER and @actualState == STATE_PARAMS_SELECTION)
 				@actualState = STATE_WAITING_SERVER
 				validateParams
 				initializeWaiting
 				joinServer
+			elsif (state == STATE_WAITING_SERVER) # Attente du serveur pour un nouveau round
+				@actualState = STATE_WAITING_SERVER
+				initializeWaiting
+			elsif (state == STATE_ENDROUND)
+				@actualState = STATE_ENDROUND
+				@gameWorking = true
+				initializeEndRound
 			elsif (state == STATE_MENU)
 				@actualState = STATE_MENU
 				initializeMenu
@@ -36,7 +47,8 @@ module TRuby::StateManager
 				(0...@nbPlayers).each do |i|
 					sendToClient(i, "init~$numPlayer!#{i}")
 				end
-				sendToClients("init~$startGame")
+				sendToClients("init~$changeToGame")
+				sendToClients("init~$startGame~$")
 				@actualState = STATE_LAUNCHING_GAME
 			end
 		end

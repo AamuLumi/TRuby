@@ -8,6 +8,7 @@ module MapReader
 		def initialize(name, path)
 			@name = name
 			@path = path
+			@tile_size = DEFAULT_TILE_SIZE
 		end
 
 		def readFile
@@ -58,8 +59,6 @@ module MapReader
 							@width = tmp[1].to_i
 						when "height"
 							@height = tmp[1].to_i
-						when "tile_size"
-							@tile_size = tmp[1].to_i
 						when "map_data"
 							readData = true
 						when "spawns"

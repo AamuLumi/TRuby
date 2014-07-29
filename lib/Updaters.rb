@@ -7,7 +7,7 @@ module TRuby::Updaters
 
 	def updateWaitingClient
 		@enterPressed = false
-		if (@nbClients == @nbPlayers)
+		if (@nbClients == @nbPlayers and @nbClientsReady == @nbClients)
 			changeState(STATE_LAUNCHING_GAME)
 		end
 	end
@@ -62,7 +62,11 @@ module TRuby::Updaters
 				changeState(STATE_MENU)
 			else
 				@map = @maps[@selection]
-				changeState(STATE_PARAMS_SELECTION)
+				if @gameWorking
+					changeState(STATE_WAITING_CLIENT)
+				else
+					changeState(STATE_PARAMS_SELECTION) 
+				end
 			end
 		elsif @enterPressed and !(button_down? Gosu::KbReturn or button_down? Gosu::GpButton1) then
 			@enterPressed = false
@@ -127,53 +131,97 @@ module TRuby::Updaters
 	end
 
 	def updatePlaying
-		if !@moveLeft and (button_down? Gosu::KbLeft or button_down? Gosu::GpLeft) then
-			if @map.datasValueFor(@player.x() -1, @player.y) & 0x1 != 1 and !bombOn(@player.x() -1, @player.y) and @player.canMove(LEFT)
-				@player.move(LEFT) 
-				sendMove(LEFT)
+		if !@player.dead and @roundLaunched
+			if !@moveLeft and (button_down? Gosu::KbLeft or button_down? Gosu::GpLeft) then
+				if @map.datasValueFor(@player.x() -1, @player.y) & 0x1 != 1 and !bombOn(@player.x() -1, @player.y) and @player.canMove(LEFT)
+					@player.move(LEFT) 
+					sendMove(LEFT)
+				end
+				@moveLeft = true
+			elsif @moveLeft and !(button_down? Gosu::KbLeft or button_down? Gosu::GpLeft) then
+				@moveLeft = false
 			end
-			@moveLeft = true
-		elsif @moveLeft and !(button_down? Gosu::KbLeft or button_down? Gosu::GpLeft) then
-			@moveLeft = false
-		end
-		if !@moveRight and (button_down? Gosu::KbRight or button_down? Gosu::GpRight) then
-			if @map.datasValueFor(@player.x() +1, @player.y) & 0x1 != 1 and !bombOn(@player.x() +1, @player.y) and @player.canMove(RIGHT)
-				@player.move(RIGHT) 
-				sendMove(RIGHT)
+			if !@moveRight and (button_down? Gosu::KbRight or button_down? Gosu::GpRight) then
+				if @map.datasValueFor(@player.x() +1, @player.y) & 0x1 != 1 and !bombOn(@player.x() +1, @player.y) and @player.canMove(RIGHT)
+					@player.move(RIGHT) 
+					sendMove(RIGHT)
+				end
+				@moveRight = true
+			elsif @moveRight and !(button_down? Gosu::KbRight or button_down? Gosu::GpRight) then
+				@moveRight = false
 			end
-			@moveRight = true
-		elsif @moveRight and !(button_down? Gosu::KbRight or button_down? Gosu::GpRight) then
-			@moveRight = false
-		end
-		if !@moveUp and (button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
-			if @map.datasValueFor(@player.x , (@player.y() -1)) & 0x1 != 1 and !bombOn(@player.x(), @player.y() -1) and @player.canMove(UP)
-				@player.move(UP) 
-				sendMove(UP)
+			if !@moveUp and (button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
+				if @map.datasValueFor(@player.x , (@player.y() -1)) & 0x1 != 1 and !bombOn(@player.x(), @player.y() -1) and @player.canMove(UP)
+					@player.move(UP) 
+					sendMove(UP)
+				end
+				@moveUp = true
+			elsif @moveUp and !(button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
+				@moveUp = false
 			end
-			@moveUp = true
-		elsif @moveUp and !(button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
-			@moveUp = false
-		end
-		if !@moveDown and (button_down? Gosu::KbDown or button_down? Gosu::GpDown) then
-			if @map.datasValueFor(@player.x , (@player.y() +1)) & 0x1 != 1 and !bombOn(@player.x(), @player.y() +1) and @player.canMove(DOWN)
-				@player.move(DOWN) 
-				sendMove(DOWN)
+			if !@moveDown and (button_down? Gosu::KbDown or button_down? Gosu::GpDown) then
+				if @map.datasValueFor(@player.x , (@player.y() +1)) & 0x1 != 1 and !bombOn(@player.x(), @player.y() +1) and @player.canMove(DOWN)
+					@player.move(DOWN) 
+					sendMove(DOWN)
+				end
+				@moveDown = true
+			elsif @moveDown and !(button_down? Gosu::KbDown or button_down? Gosu::GpDown) then
+				@moveDown = false
 			end
-			@moveDown = true
-		elsif @moveDown and !(button_down? Gosu::KbDown or button_down? Gosu::GpDown) then
-			@moveDown = false
-		end
-		if !@bombPut and !bombOn(@player.x, @player.y) and @player.hasBomb and (button_down? Gosu::KbSpace or button_down? Gosu::GpButton1) then
-			putBomb(@num_actual_player, @players[@num_actual_player].x, @players[@num_actual_player].y)
-			sendBomb(@players[@num_actual_player].x, @players[@num_actual_player].y)
-			@bombPut = true
-		elsif @bombPut and !(button_down? Gosu::KbSpace or button_down? Gosu::GpButton1)
-			@bombPut = false
+			if !@bombPut and !bombOn(@player.x, @player.y) and @player.hasBomb and (button_down? Gosu::KbSpace or button_down? Gosu::GpButton1) then
+				putBomb(@num_actual_player, @players[@num_actual_player].x, @players[@num_actual_player].y)
+				sendBomb(@players[@num_actual_player].x, @players[@num_actual_player].y)
+				@bombPut = true
+			elsif @bombPut and !(button_down? Gosu::KbSpace or button_down? Gosu::GpButton1)
+				@bombPut = false
+			end
 		end
 
 		checkBombs
 		checkPlayers
 		checkExplosions
+		checkVictory
+	end
+
+	def updateEndRound
+		if (@keyboardIn)
+			keyboardNumInput(@paramsItems[@selection])
+		else
+			if !@moveDown and (button_down? Gosu::KbDown or button_down? Gosu::GpDown)
+				@selection = (@selection + 1) % (@endRoundItems.size() +1)
+				@moveDown = true
+			elsif @moveDown and !(button_down? Gosu::KbDown or button_down? Gosu::GpDown) then
+				@moveDown = false
+			end
+
+			if !@moveUp and (button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
+				@selection = (@selection - 1) % (@endRoundItems.size() +1)
+				@moveUp = true
+			elsif @moveUp and !(button_down? Gosu::KbUp or button_down? Gosu::GpUp) then
+				@moveUp = false
+			end
+
+			if !@enterPressed and (button_down? Gosu::KbReturn or button_down? Gosu::GpButton1) 
+				@enterPressed = true
+				puts @selection
+				if (@selection == @paramsItems.size())
+					if @isServer
+						changeState(STATE_MENU) 
+					else
+						changeState(STATE_MENU) ## A MODIFIER
+					end
+				elsif (@selection == SELECTION_PLAY)
+					if @isServer
+						changeState(STATE_MAP_SELECTION) 
+					else
+						changeState(STATE_WAITING_SERVER)
+					end
+					sendReady
+				end
+			elsif @enterPressed and !(button_down? Gosu::KbReturn or button_down? Gosu::GpButton1) then
+				@enterPressed = false
+			end
+		end
 	end
 
 	def keyboardNumInput(param)
