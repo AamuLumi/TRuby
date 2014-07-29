@@ -3,7 +3,7 @@ TRuby
 
 Bomberman-like in Ruby 1.9.3 with [Gosu gem](http://www.libgosu.org/).
 
-## How to use it
+### How to use it
 
 Before any launch, you need [Gosu](http://www.libgosu.org/).
   > gem install gosu
@@ -13,7 +13,7 @@ Before any launch, you need [Gosu](http://www.libgosu.org/).
 You must just launch the "main.rb" file with ruby :
   > ruby main.rb
 
-## Functionalities
+### Functionalities
 
   - [x] Network game (auto-launched server via "Create Server" option in main menu)
   - [x] Map Selection and Parameters Selection
@@ -21,7 +21,7 @@ You must just launch the "main.rb" file with ruby :
   - [x] Death implemented
   - [x] Game separated with round
 
-## Must be developped
+### Must be developped
 
   - [ ] More power-ups
   - [ ] Balance explosions and death
@@ -43,7 +43,7 @@ Known Issues
 Screenshots
 =====
 
-[Screenshot 1 - Main menu](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot1.PNG)
-[Screenshot 2 - Parameters selection](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screeshot2.PNG)
-[Screenshot 3 - In game](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot3.PNG)
-[Screenshot 4 - End round](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot4.PNG)
+[Screenshot 1 - Main menu](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot1.PNG)  
+[Screenshot 2 - Parameters selection](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screeshot2.PNG)  
+[Screenshot 3 - In game](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot3.PNG)  
+[Screenshot 4 - End round](http://serveur1.archive-host.com/membres/up/682970577/TRuby/screenshot4.PNG)  
